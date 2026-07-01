@@ -6,14 +6,457 @@
 <meta name="theme-color" content="#11151f">
 <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <title>Cancionero · Misión País</title>
-<link rel="stylesheet" href="style.css">
+<style>
+/* ============ THEME ============ */
+:root{
+  --bg:#FBF7EF; --surface:#FFFFFF; --surface-2:#F4EEE0;
+  --ink:#20242E; --muted:#6E6757; --faint:#9C9484;
+  --line:#E6DDC9; --line-strong:#D6CBB1;
+  --indigo:#2B3A67; --indigo-ink:#fff;
+  --gold:#9C6D1C; --gold-bg:#F3E9D2;
+  --star:#C99A21;
+  --danger:#9C2B2B;
+  --shadow:0 1px 2px rgba(40,33,15,.05), 0 8px 30px -12px rgba(40,33,15,.18);
+  --radius:14px; --radius-sm:10px;
+  --lyric-size:18px;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --serif:Georgia,"Iowan Old Style","Times New Roman",serif;
+  --mono:"SF Mono",ui-monospace,"Cascadia Mono","Roboto Mono",Menlo,Consolas,monospace;
+}
+html[data-theme="dark"]{
+  --bg:#10141E; --surface:#181F2D; --surface-2:#1F2738;
+  --ink:#ECE7DA; --muted:#9AA2B3; --faint:#6E7689;
+  --line:#28324A; --line-strong:#374564;
+  --indigo:#7E92D0; --indigo-ink:#0C1018;
+  --gold:#E0B354; --gold-bg:#2A2A1C;
+  --star:#E5BC4A;
+  --danger:#E07A7A;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 14px 40px -16px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%}
+body{
+  background:var(--bg); color:var(--ink); font-family:var(--sans);
+  -webkit-font-smoothing:antialiased; line-height:1.45; overflow-x:hidden;
+  overscroll-behavior-y:none;
+}
+button{font-family:inherit;cursor:pointer;color:inherit}
+input,select,textarea{font-family:inherit;color:inherit}
+::selection{background:var(--gold-bg)}
+
+/* ============ LAYOUT ============ */
+.app{display:flex;flex-direction:column;min-height:100%}
+header.top{
+  position:sticky;top:0;z-index:40;
+  background:var(--indigo);color:var(--indigo-ink);
+  padding:env(safe-area-inset-top) 0 0;
+  box-shadow:0 2px 14px -6px rgba(0,0,0,.4);
+}
+.top-inner{display:flex;align-items:center;gap:12px;padding:11px 16px;max-width:1100px;margin:0 auto;width:100%}
+.brand{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;flex-shrink:0}
+.brand .mark{width:30px;height:30px;flex-shrink:0}
+.brand h1{font-family:var(--serif);font-size:19px;font-weight:600;margin:0;letter-spacing:.2px;white-space:nowrap}
+.brand small{display:block;font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;opacity:.62;font-family:var(--sans)}
+.search-wrap{flex:1;position:relative;min-width:0}
+.search-wrap input{
+  width:100%;border:none;border-radius:999px;padding:10px 14px 10px 38px;font-size:15px;
+  background:rgba(255,255,255,.14);color:var(--indigo-ink);outline:none;
+}
+html[data-theme="dark"] .search-wrap input{background:rgba(255,255,255,.08)}
+.search-wrap input::placeholder{color:rgba(255,255,255,.6)}
+.search-wrap .ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);opacity:.7;pointer-events:none}
+.search-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.18);border:none;border-radius:999px;width:24px;height:24px;display:none;align-items:center;justify-content:center;color:inherit}
+.search-clear.show{display:flex}
+.iconbtn{background:rgba(255,255,255,.12);border:none;border-radius:10px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s}
+.iconbtn:hover{background:rgba(255,255,255,.22)}
+html[data-theme="dark"] .iconbtn{background:rgba(255,255,255,.07)}
+
+.tabs{display:flex;gap:4px;padding:0 16px 10px;max-width:1100px;margin:0 auto;width:100%}
+.tab{background:transparent;border:none;color:rgba(255,255,255,.7);font-size:13.5px;font-weight:600;padding:7px 14px;border-radius:999px;letter-spacing:.01em}
+.tab.active{background:rgba(255,255,255,.16);color:var(--indigo-ink)}
+
+main{flex:1;max-width:1100px;margin:0 auto;width:100%;padding:0 16px 80px}
+
+/* ============ FILTERS ============ */
+.filters{position:sticky;top:0;z-index:20;background:linear-gradient(var(--bg) 70%,transparent);padding:14px 0 8px;margin:0 -16px;padding-left:16px;padding-right:16px}
+.chips{display:flex;gap:7px;overflow-x:auto;padding-bottom:3px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{
+  flex-shrink:0;border:1px solid var(--line-strong);background:var(--surface);color:var(--muted);
+  border-radius:999px;padding:6px 13px;font-size:13px;font-weight:600;white-space:nowrap;transition:all .12s;
+}
+.chip:hover{border-color:var(--gold)}
+.chip.active{background:var(--indigo);color:var(--indigo-ink);border-color:var(--indigo)}
+.chip .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.meta-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:11px;flex-wrap:wrap}
+.count{font-size:12.5px;color:var(--faint);font-weight:600}
+.coll-select{font-size:13px;font-weight:600;color:var(--muted);background:var(--surface);border:1px solid var(--line-strong);border-radius:8px;padding:6px 9px}
+
+/* ============ SONG LIST ============ */
+.list{margin-top:6px}
+.song-row{
+  display:flex;align-items:center;gap:13px;padding:13px 12px;border-radius:var(--radius-sm);
+  cursor:pointer;transition:background .12s;border:1px solid transparent;
+}
+.song-row:hover{background:var(--surface)}
+.song-num{font-family:var(--serif);font-size:13px;color:var(--faint);width:34px;text-align:right;flex-shrink:0;font-variant-numeric:tabular-nums}
+.song-main{flex:1;min-width:0}
+.song-title{font-family:var(--serif);font-size:16.5px;font-weight:600;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.song-sub{font-size:11.5px;color:var(--faint);margin-top:3px;display:flex;align-items:center;gap:7px}
+.cat-tag{font-weight:700;letter-spacing:.02em;text-transform:uppercase;font-size:10px;padding:2px 7px;border-radius:5px}
+.song-row .row-actions{display:flex;gap:2px;flex-shrink:0;opacity:.55}
+.song-row:hover .row-actions{opacity:1}
+.mini{background:transparent;border:none;width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.mini:hover{background:var(--surface-2);color:var(--ink)}
+.mini.faved{color:var(--star)}
+.divider{height:1px;background:var(--line);margin:0 12px}
+.empty{text-align:center;padding:70px 20px;color:var(--faint)}
+.empty .big{font-family:var(--serif);font-size:19px;color:var(--muted);margin-bottom:6px}
+
+/* ============ SONG VIEW ============ */
+.song-view{padding-top:8px;animation:fade .2s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.sv-back{display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:var(--muted);font-weight:600;font-size:14px;padding:14px 0 6px}
+.sv-back:hover{color:var(--ink)}
+.sv-head{padding:2px 0 6px}
+.sv-title{font-family:var(--serif);font-size:27px;font-weight:600;line-height:1.15;margin:0}
+.sv-meta{display:flex;align-items:center;gap:9px;margin-top:9px;flex-wrap:wrap;font-size:12.5px;color:var(--faint)}
+
+.ribbon{
+  position:sticky;top:8px;z-index:15;display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+  background:var(--surface);border:1px solid var(--line);border-radius:999px;
+  padding:6px;margin:14px 0 22px;box-shadow:var(--shadow);
+}
+.rib-group{display:flex;align-items:center;gap:2px;background:var(--surface-2);border-radius:999px;padding:3px}
+.rib-btn{background:transparent;border:none;border-radius:999px;padding:6px 10px;font-size:13px;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:5px;min-height:32px}
+.rib-btn:hover{color:var(--ink)}
+.rib-btn.active{background:var(--indigo);color:var(--indigo-ink)}
+.rib-key{font-family:var(--mono);font-size:13.5px;font-weight:700;color:var(--gold);min-width:46px;text-align:center;padding:0 4px;font-variant-numeric:tabular-nums}
+.rib-circ{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;background:transparent;border:none;color:var(--indigo)}
+html[data-theme="dark"] .rib-circ{color:var(--indigo)}
+.rib-circ:hover{background:var(--surface-2)}
+.rib-sep{width:1px;align-self:stretch;background:var(--line);margin:2px 2px}
+.rib-btn.ghost{color:var(--faint)}
+
+/* lyric body */
+.body{font-size:var(--lyric-size);max-width:680px;max-width:min(680px,100%)}
+.section{margin:0 0 24px}
+.line{margin:0 0 2px}
+.chordline{font-family:var(--mono);color:var(--gold);font-weight:600;font-size:.82em;letter-spacing:.02em;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;line-height:1.35;margin-bottom:-1px}
+.lyricline{font-family:var(--serif);line-height:1.5}
+.lyricline.empty-l{height:.7em}
+.no-chords .chordline{display:none}
+
+/* edit lock badge */
+.editlock{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--gold);background:var(--gold-bg);padding:3px 8px;border-radius:6px}
+
+/* ============ LISTS ============ */
+.lists-head{display:flex;align-items:center;justify-content:space-between;padding:18px 0 6px}
+.lists-head h2{font-family:var(--serif);font-size:22px;margin:0}
+.list-card{display:flex;align-items:center;gap:13px;padding:15px 14px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:10px;cursor:pointer;transition:border-color .12s}
+.list-card:hover{border-color:var(--gold)}
+.list-card .lc-ico{width:42px;height:42px;border-radius:10px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--indigo)}
+.list-card .lc-main{flex:1;min-width:0}
+.list-card .lc-name{font-family:var(--serif);font-size:17px;font-weight:600}
+.list-card .lc-sub{font-size:12px;color:var(--faint);margin-top:2px}
+.list-banner{display:flex;align-items:center;gap:10px;padding:12px 0 4px}
+.list-banner h2{font-family:var(--serif);font-size:21px;margin:0;flex:1}
+
+/* ============ BUTTONS ============ */
+.btn{border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);border-radius:10px;padding:9px 15px;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:7px;transition:all .12s}
+.btn:hover{border-color:var(--gold)}
+.btn.primary{background:var(--indigo);color:var(--indigo-ink);border-color:var(--indigo)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--danger);border-color:transparent;background:transparent}
+.btn.danger:hover{background:var(--gold-bg)}
+.btn.sm{padding:6px 11px;font-size:13px}
+
+/* ============ MODAL ============ */
+.scrim{position:fixed;inset:0;background:rgba(20,16,6,.5);backdrop-filter:blur(3px);z-index:60;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .18s}
+.scrim.show{opacity:1;pointer-events:auto}
+@media(min-width:640px){.scrim{align-items:center}}
+.modal{background:var(--bg);border-radius:18px 18px 0 0;width:100%;max-width:560px;max-height:90vh;overflow:auto;box-shadow:var(--shadow);transform:translateY(20px);transition:transform .2s;padding:0}
+@media(min-width:640px){.modal{border-radius:18px;transform:scale(.97)}}
+.scrim.show .modal{transform:none}
+.modal-head{position:sticky;top:0;background:var(--bg);display:flex;align-items:center;justify-content:space-between;padding:18px 18px 12px;z-index:2;border-bottom:1px solid var(--line)}
+.modal-head h3{font-family:var(--serif);font-size:19px;margin:0}
+.modal-body{padding:16px 18px 22px}
+.field{margin-bottom:15px}
+.field label{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;border:1px solid var(--line-strong);background:var(--surface);border-radius:10px;padding:10px 12px;font-size:15px;outline:none}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--gold)}
+.field textarea{resize:vertical;line-height:1.4}
+.hint{font-size:12px;color:var(--faint);margin-top:6px;line-height:1.4}
+
+/* add-to-list rows */
+.lopt{display:flex;align-items:center;gap:11px;padding:12px;border:1px solid var(--line);border-radius:11px;margin-bottom:8px;cursor:pointer}
+.lopt:hover{border-color:var(--gold)}
+.lopt .check{width:22px;height:22px;border-radius:6px;border:2px solid var(--line-strong);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.lopt.on .check{background:var(--indigo);border-color:var(--indigo);color:#fff}
+.lopt .l-name{font-weight:600;flex:1}
+.lopt .l-n{font-size:12px;color:var(--faint)}
+
+/* edit editor */
+.ed-section{border:1px solid var(--line);border-radius:12px;padding:11px;margin-bottom:12px;background:var(--surface)}
+.ed-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.ed-section-head .lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--faint)}
+.ed-line{display:grid;grid-template-columns:1fr;gap:5px;margin-bottom:9px;padding-bottom:9px;border-bottom:1px dashed var(--line)}
+.ed-line:last-child{border-bottom:none;margin-bottom:4px;padding-bottom:0}
+.ed-line input{width:100%;border:1px solid var(--line-strong);background:var(--bg);border-radius:8px;padding:7px 10px;font-size:14px}
+.ed-line .ci{font-family:var(--mono);color:var(--gold);font-size:13px}
+.ed-line-tools{display:flex;gap:6px;align-items:center}
+.txt-mini{background:none;border:none;color:var(--faint);font-size:12px;font-weight:600;padding:4px 6px;border-radius:6px}
+.txt-mini:hover{background:var(--surface-2);color:var(--ink)}
+.txt-mini.del:hover{color:var(--danger)}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:999px;font-size:14px;font-weight:600;z-index:90;opacity:0;transition:all .22s;pointer-events:none;box-shadow:var(--shadow);max-width:90vw}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* fab autoscroll */
+.scroll-fab{position:fixed;right:18px;bottom:calc(22px + env(safe-area-inset-bottom));z-index:35;display:none;align-items:center;gap:8px;background:var(--indigo);color:var(--indigo-ink);border:none;border-radius:999px;padding:11px 16px;font-weight:700;font-size:13px;box-shadow:var(--shadow)}
+.scroll-fab.show{display:flex}
+
+@media(max-width:560px){
+  .brand small{display:none}
+  .sv-title{font-size:23px}
+  .rib-key{min-width:40px}
+}
+/* En móvil muy estrecho, ocultar el texto "Cancionero" para que la barra de búsqueda tenga espacio */
+@media(max-width:480px){
+  .brand h1{display:none}
+  .top-inner{gap:8px;padding:9px 12px}
+  .feedback-tab span, .feedback-tab svg+*{display:none}
+  .tabs{gap:2px;padding:0 10px 8px}
+  .tab{padding:7px 10px;font-size:12.5px}
+  .feedback-tab{padding:7px 8px}
+}
+/* two-column (lyric | chords) */
+.body.two-col .section{margin-bottom:18px}
+.body.two-col .line2{display:grid;grid-template-columns:1fr minmax(0,40%);gap:16px;align-items:baseline;padding:1px 0}
+.body.two-col .lyr2{font-family:var(--serif);line-height:1.55}
+.body.two-col .lyr2.empty-l{height:.6em}
+.body.two-col .chd2{font-family:var(--mono);color:var(--gold);font-weight:600;font-size:.82em;letter-spacing:.02em;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;line-height:1.55}
+.body.two-col.no-chords .chd2{display:none}
+.body.two-col.no-chords .line2{grid-template-columns:1fr}
+
+/* credits */
+.sv-credits{font-size:12.5px;color:var(--gold);font-weight:600;margin-top:8px;font-style:italic}
+
+/* song extras: link / comments / report */
+.sv-extra{max-width:680px;margin-top:30px;border-top:1px solid var(--line);padding-top:8px}
+.ex-block{padding:16px 0;border-bottom:1px solid var(--line)}
+.ex-block:last-child{border-bottom:none}
+.ex-head{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px}
+.link-chip{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line-strong);border-radius:999px;padding:8px 14px;color:var(--indigo);font-weight:600;font-size:14px;text-decoration:none;max-width:100%}
+.link-chip:hover{border-color:var(--gold)}
+.link-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.link-chip.sm{padding:5px 11px;font-size:13px}
+.cmt-list{display:flex;flex-direction:column;gap:9px;margin-bottom:11px}
+.cmt{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:10px 12px}
+.cmt-text{font-size:14.5px;line-height:1.45;white-space:pre-wrap}
+.cmt-by{font-size:11.5px;color:var(--faint);margin-top:5px;font-weight:600}
+
+/* moderation zone (editor) */
+.mod-zone{border:1px solid var(--line);border-radius:12px;padding:13px;margin-bottom:18px;background:var(--surface)}
+.mod-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.mod-row:last-child{border-bottom:none}
+.mod-cmt{font-size:13.5px;line-height:1.4;flex:1;min-width:0}
+
+/* review / preview */
+.rev-list{display:flex;flex-direction:column;gap:12px;margin-top:8px}
+.rev-card{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--surface)}
+.rev-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.rev-main{flex:1;min-width:0}
+.rev-title{font-family:var(--serif);font-size:18px;font-weight:600;line-height:1.2}
+.rev-preview{margin-top:12px}
+.rev-preview summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--indigo);user-select:none}
+.rev-body{margin-top:12px;font-size:16px;border-top:1px solid var(--line);padding-top:12px}
+/* selector de etiquetas (categorías) en el editor */
+.tagsel-wrap{display:flex;flex-wrap:wrap;gap:7px}
+.tagsel{border:1px solid var(--line-strong);background:var(--surface);color:var(--muted);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.tagsel:hover{border-color:var(--gold)}
+.tagsel.on{background:var(--indigo);color:var(--indigo-ink);border-color:var(--indigo)}
+.tagsel .dot{width:7px;height:7px;border-radius:50%}
+.tagsel.on .dot{outline:1px solid rgba(255,255,255,.5)}
+
+/* acordes no reconocidos (rojo) */
+.chord-bad{color:var(--danger);text-decoration:underline wavy var(--danger);text-underline-offset:2px}
+.ci-bad{border-color:var(--danger)!important;background:var(--gold-bg)!important}
+.chord-warn{background:var(--gold-bg);color:var(--danger);border:1px solid var(--danger);border-radius:10px;padding:9px 12px;font-size:12.5px;line-height:1.4;margin:4px 0 8px}
+.bad-note{max-width:680px;background:var(--gold-bg);color:var(--ink);border:1px solid var(--line-strong);border-left:3px solid var(--danger);border-radius:8px;padding:9px 12px;font-size:12.5px;line-height:1.4;margin:0 0 14px}
+.bad-note .chord-bad{font-weight:700}
+
+/* cejillo */
+.capo-meta{font-weight:700;color:var(--gold);background:var(--gold-bg);padding:2px 8px;border-radius:5px;font-size:11px;text-transform:uppercase;letter-spacing:.03em}
+.capo-note{max-width:680px;background:var(--surface);border:1px solid var(--line-strong);border-left:3px solid var(--indigo);border-radius:8px;padding:9px 12px;font-size:12.5px;line-height:1.4;margin:0 0 14px;color:var(--muted)}
+.capo-banner{display:inline-flex;align-items:center;gap:8px;background:var(--gold-bg);color:var(--gold-ink,#7a5a12);border:1px solid var(--gold);border-radius:9px;padding:7px 14px;font-size:14px;font-weight:700;margin:0 0 12px}
+.capo-banner svg{flex:none}
+.capo-banner.off{background:var(--indigo);color:var(--indigo-ink);border-color:var(--indigo)}
+
+/* ---- REPERTORIO ---- */
+.rep-wrap{max-width:760px;margin:0 auto;padding:6px 2px 40px}
+.rep-intro{color:var(--muted);font-size:13.5px;line-height:1.5;margin:0 0 16px}
+.rep-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}
+.rep-title-input{width:100%;margin-bottom:14px}
+.rep-part{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:var(--surface)}
+.rep-part.omit{opacity:.55}
+.rep-part.locked{border-color:var(--gold);box-shadow:inset 3px 0 0 var(--gold)}
+.rep-part-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.rep-part-name{font-weight:800;font-size:14px;letter-spacing:.01em}
+.rep-part-tools{display:flex;gap:6px;flex-wrap:wrap}
+.rep-chip{border:1px solid var(--line-strong);background:var(--surface-2);color:var(--muted);border-radius:8px;padding:5px 9px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.rep-chip:hover{border-color:var(--gold);color:var(--ink)}
+.rep-chip.on{background:var(--gold-bg);color:var(--gold-ink,#7a5a12);border-color:var(--gold)}
+.rep-chip.danger:hover{border-color:var(--danger);color:var(--danger)}
+.rep-song{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.rep-song-name{font-size:15px;font-weight:600;color:var(--ink);cursor:pointer;flex:1;min-width:0}
+.rep-song-name:hover{color:var(--gold-ink,var(--gold));text-decoration:underline}
+.rep-song-name.empty{color:var(--faint);font-style:italic;font-weight:500;cursor:default}
+.rep-song-name.empty:hover{color:var(--faint);text-decoration:none}
+.rep-pick-list{max-height:50vh;overflow:auto;margin-top:8px;border-top:1px solid var(--line)}
+.rep-pick-row{padding:10px 6px;border-bottom:1px solid var(--line);cursor:pointer;display:flex;flex-direction:column;gap:2px}
+.rep-pick-row:hover{background:var(--surface-2)}
+.rep-pick-row .t{font-weight:600;font-size:14px}
+.rep-pick-row .s{font-size:11.5px;color:var(--muted)}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* ===== v2: nuevas funciones ===== */
+/* Alpha bar (índice rápido por letra) */
+.alpha-bar{position:fixed;right:4px;top:50%;transform:translateY(-50%);z-index:28;display:none;flex-direction:column;align-items:center;padding:5px 2px;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+.alpha-bar.show{display:flex}
+.alpha-letter{font-size:9.5px;font-weight:700;color:var(--faint);cursor:pointer;padding:2px 5px;border-radius:4px;line-height:1.3;transform-origin:right center;user-select:none;display:block;text-align:center;transition:transform .06s,color .06s}
+.alpha-letter.dim{opacity:.25;pointer-events:none;cursor:default}
+@media(max-width:480px){.alpha-letter{font-size:8px;padding:1.5px 3px}}
+/* Botón volver al inicio */
+.back-to-top{position:fixed;right:18px;bottom:calc(72px + env(safe-area-inset-bottom));z-index:36;width:40px;height:40px;border-radius:50%;background:var(--surface);border:1px solid var(--line-strong);color:var(--muted);display:none;align-items:center;justify-content:center;box-shadow:var(--shadow);transition:all .15s;cursor:pointer}
+.back-to-top.show{display:flex}
+.back-to-top:hover{border-color:var(--gold);color:var(--ink)}
+/* Filtro de colecciones (checklist) */
+.coll-filter-wrap{position:relative}
+.coll-filter-btn{font-size:13px;font-weight:600;color:var(--muted);background:var(--surface);border:1px solid var(--line-strong);border-radius:8px;padding:6px 10px;display:inline-flex;align-items:center;gap:5px;cursor:pointer;transition:border-color .12s;white-space:nowrap}
+.coll-filter-btn:hover{border-color:var(--gold)}
+.coll-filter-btn.active{background:var(--indigo);color:var(--indigo-ink);border-color:var(--indigo)}
+.coll-panel{position:absolute;right:0;top:calc(100% + 6px);background:var(--bg);border:1px solid var(--line-strong);border-radius:12px;padding:6px;min-width:210px;max-height:280px;overflow-y:auto;box-shadow:var(--shadow);z-index:25;display:none}
+.coll-panel.show{display:block}
+.coll-opt{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13.5px;font-weight:600;color:var(--ink)}
+.coll-opt:hover{background:var(--surface)}
+.coll-opt .cb{width:18px;height:18px;border-radius:5px;border:2px solid var(--line-strong);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .12s}
+.coll-opt.checked .cb{background:var(--indigo);border-color:var(--indigo);color:#fff}
+/* Badge de pendientes */
+.pending-badge{display:inline-flex;align-items:center;justify-content:center;background:var(--danger);color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:999px;padding:0 4px;margin-left:4px;vertical-align:middle}
+/* Lista de múltiples links */
+.links-list{display:flex;flex-direction:column;gap:7px;margin-bottom:10px}
+.link-item{display:flex;align-items:center;gap:8px;min-width:0}
+.link-item .link-chip{flex:1;min-width:0}
+/* Botón de feedback en header */
+.feedback-tab{background:transparent;border:none;color:rgba(255,255,255,.65);font-size:12.5px;font-weight:600;padding:7px 10px;border-radius:999px;display:flex;align-items:center;gap:5px;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.feedback-tab:hover{color:var(--indigo-ink);background:rgba(255,255,255,.1)}
+/* Chip canciones más visitadas */
+.chip.top-visited{border-color:var(--star);color:var(--star)}
+.chip.top-visited.active{background:var(--star);color:#fff;border-color:var(--star)}
+/* Marcadores de letra en la lista */
+.alpha-anchor-row{padding:12px 12px 2px;font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);pointer-events:none;user-select:none}
+/* Banner de edición pendiente propia */
+.pending-banner{display:flex;align-items:center;gap:8px;background:var(--gold-bg);border:1px solid var(--gold);border-radius:10px;padding:9px 14px;font-size:12.5px;font-weight:600;color:var(--gold);margin:12px 0}
+.dup-banner{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--gold-bg);border:1px solid var(--gold);border-radius:10px;padding:8px 12px;font-size:12.5px;font-weight:600;color:var(--gold);margin-top:8px}
+.notif-badge{position:absolute;top:1px;right:1px;display:flex;align-items:center;justify-content:center;background:var(--danger);color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:999px;padding:0 4px}
+.notif-item{display:flex;gap:10px;align-items:flex-start;padding:11px 8px;border-bottom:1px solid var(--line);cursor:pointer}
+.notif-item:last-child{border-bottom:none}
+.notif-item.unread{background:var(--surface-2);border-radius:10px}
+.notif-item .notif-ico{flex-shrink:0;margin-top:2px}
+.notif-msg{font-size:13.5px;line-height:1.4;color:var(--ink)}
+.notif-item.unread .notif-msg{font-weight:700}
+.notif-date{font-size:11px;color:var(--faint);margin-top:3px}
+/* Filas de admin colecciones */
+.coll-admin-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.coll-admin-row input{flex:1;border:1px solid var(--line-strong);background:var(--surface);border-radius:8px;padding:8px 10px;font-size:14px;color:var(--ink);outline:none}
+.coll-admin-row input:focus{border-color:var(--gold)}
+.coll-order-btns{display:flex;flex-direction:column;gap:2px;flex-shrink:0}
+/* Tarjetas de revisión de pendientes */
+.pending-rev-card{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface);margin-bottom:12px}
+.pending-rev-title{font-family:var(--serif);font-size:16px;font-weight:600;margin-bottom:4px}
+.pending-rev-meta{font-size:11.5px;color:var(--faint);margin-bottom:10px}
+.pending-rev-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+/* Checklist selección de canciones (asignar a colección) */
+.song-check-list{max-height:260px;overflow-y:auto;border:1px solid var(--line);border-radius:10px;margin-top:8px}
+.song-check-row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line);cursor:pointer}
+.song-check-row:last-child{border-bottom:none}
+.song-check-row:hover{background:var(--surface-2)}
+.song-check-row .cb{width:18px;height:18px;border-radius:5px;border:2px solid var(--line-strong);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .12s}
+.song-check-row.checked .cb{background:var(--indigo);border-color:var(--indigo);color:#fff}
+
+/* ==================== diagramas de acordes (vista canción) ==================== */
+.sv-chords{max-width:680px;margin-top:26px}
+.cd-strip{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.cd-cell{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:5px 3px 4px}
+.cd-svg{display:block;width:64px;height:78px}
+
+.cd-label{font-family:var(--mono);font-size:9px;font-weight:700;fill:var(--ink);letter-spacing:.01em}
+.cd-nut{fill:var(--ink)}
+.cd-fretline{stroke:var(--line-strong);stroke-width:.7}
+.cd-string{stroke:var(--line-strong);stroke-width:.7}
+.cd-fretnum{font-family:var(--mono);font-size:8px;fill:var(--muted)}
+.cd-barre{stroke:var(--gold);stroke-width:4.5;stroke-linecap:round}
+.cd-open{fill:none;stroke:var(--ink);stroke-width:1}
+.cd-dot{fill:var(--gold)}
+.cd-mute{font-family:var(--mono);font-size:8px;fill:var(--danger);font-weight:700}
+
+.cd-missing{
+  width:64px;height:78px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;text-align:center;font-family:var(--mono);font-size:9px;color:var(--muted);
+  border:1px dashed var(--line-strong);border-radius:6px;padding:4px;box-sizing:border-box
+}
+.cd-missing-mark{font-size:14px;font-weight:700;color:var(--danger)}
+
+/* ==================== chips de acordes (formulario de edición) ==================== */
+.cd-chip-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.cd-chip{
+  background:var(--surface);border:1px solid var(--line-strong);border-radius:8px;
+  padding:3px 3px 2px;cursor:pointer;transition:border-color .15s
+}
+.cd-chip:hover{border-color:var(--gold)}
+.cd-chip .cd-svg{width:52px;height:64px}
+.cd-chip-custom{border-color:var(--gold);border-width:2px}
+.cd-chip .cd-missing{width:52px;height:64px}
+
+/* ==================== modal editor de un acorde ==================== */
+.cd-editor-preview{display:flex;justify-content:center;padding:10px 0 4px}
+.cd-editor-preview .cd-svg{width:110px;height:132px}
+
+.cd-editor-tabs{display:flex;gap:8px;margin:14px 0}
+.cd-tab{
+  flex:1;text-align:center;padding:9px 10px;border-radius:9px;border:1px solid var(--line-strong);
+  background:var(--surface);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer
+}
+.cd-tab.on{background:var(--indigo);color:var(--indigo-ink);border-color:var(--indigo)}
+.cd-tab:disabled{opacity:.35;cursor:not-allowed}
+
+.cd-lib-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 2px}
+
+.cd-manual-editor{display:flex;justify-content:center;padding:6px 0}
+.cd-editor-svg{width:220px;height:196px}
+.cd-editor-fretnum{font-family:var(--mono);font-size:10px;fill:var(--muted)}
+
+.cd-mute-btn{font-family:var(--mono);font-size:13px;font-weight:700;fill:var(--muted);cursor:pointer}
+.cd-mute-btn.on{fill:var(--danger)}
+.cd-open-btn{fill:none;stroke:var(--line-strong);stroke-width:1.4;cursor:pointer}
+.cd-open-btn.on{stroke:var(--ink);stroke-width:2}
+.cd-cell-hit{fill:transparent;cursor:pointer}
+.cd-cell-hit:hover{fill:var(--gold-bg)}
+.cd-barre-btn{fill:var(--surface);stroke:var(--line-strong);stroke-width:.6;cursor:pointer}
+.cd-barre-btn.on{fill:var(--gold)}
+
+.cd-basefret-row{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:8px}
+.cd-basefret-val{font-family:var(--mono);font-weight:700;min-width:18px;text-align:center}
+
+</style>
 </head>
 <body>
 <div class="app">
   <header class="top">
     <div class="top-inner">
       <div class="brand" id="brand">
-        <img class="mark brand-logo" src="data:image/avif;base64,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" alt="Logo CMP">
+        <img class="mark" src="data:image/avif;base64,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" alt="Logo CMP" style="object-fit:contain">
         <div>
           <h1>Cancionero</h1>
           <small>Misión País</small>
@@ -26,10 +469,10 @@
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M6 6l12 12M18 6L6 18"/></svg>
         </button>
       </div>
-      <button class="iconbtn iconbtn-auth" id="authBtn" aria-label="Cuenta" title="Cuenta">…</button>
-      <button class="iconbtn iconbtn-notif" id="notifBtn" aria-label="Notificaciones" title="Notificaciones">
+      <button class="iconbtn" id="authBtn" aria-label="Cuenta" title="Cuenta" style="font-size:12px;font-weight:700;min-width:32px">…</button>
+      <button class="iconbtn" id="notifBtn" aria-label="Notificaciones" title="Notificaciones" style="display:none;position:relative">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        <span class="notif-badge" id="notifBadge">0</span>
+        <span class="notif-badge" id="notifBadge" style="display:none">0</span>
       </button>
       <button class="iconbtn" id="themeBtn" aria-label="Tema" title="Cambiar tema"></button>
       <button class="iconbtn" id="settingsBtn" aria-label="Ajustes" title="Ajustes">
@@ -256,6 +699,386 @@ function chordsHTML(chords,shift,flat){
 }
 
 // =================================================================
+//  DIAGRAMAS DE ACORDES
+// =================================================================
+const CD_ROWS = 4;   // filas visibles en el diagrama — cubre el 100% de los voicings de chords-db (máx real: 4)
+const CD_STRINGS = 6;
+
+// ---- librería global (lazy load, una sola vez por sesión) ----
+let GLOBAL_CHORDS = null;
+let _chordsLoadPromise = null;
+function loadGlobalChords(){
+  if(GLOBAL_CHORDS) return Promise.resolve(GLOBAL_CHORDS);
+  if(_chordsLoadPromise) return _chordsLoadPromise;
+  _chordsLoadPromise = fetch("chords-db-latino.json")
+    .then(r=>{ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+    .then(data=>{ GLOBAL_CHORDS=data; return data; })
+    .catch(err=>{
+      console.error("No se pudo cargar la librería de acordes:", err);
+      GLOBAL_CHORDS={};
+      return GLOBAL_CHORDS;
+    });
+  return _chordsLoadPromise;
+}
+
+// ---- clave canónica de un acorde (para lookup) ----
+// "SOLm7" -> "SOLm7"   "REm/fa#" -> "REm/FA#"   devuelve null si no es un acorde reconocible
+function canonicalChordKey(token){
+  if(!token) return null;
+  const segs = token.split("/");
+  const out = [];
+  for(const seg of segs){
+    const m = seg.match(ROOT_RE);
+    if(!m) return null;
+    const root=m[1], acc=m[2], rest=m[3];
+    const pc = noteToPc(root, acc);
+    if(pc===null) return null;
+    const base=CANON[pc][0], nacc=CANON[pc][1];
+    out.push(base+nacc+rest);
+  }
+  return out.join("/");
+}
+
+// ---- lista ordenada de acordes únicos usados en una canción (vista), ya transpuestos ----
+function extractSongChordKeys(song, shift, flat){
+  const seen = new Set();
+  const order = [];
+  for(const sec of song.sections||[]){
+    for(const ln of sec){
+      if(!ln.chords) continue;
+      for(const tok of ln.chords.split(/\s+/)){
+        if(!tok) continue;
+        if(chordTokenStatus(tok)!=="ok") continue; // ignora símbolos (| - %) y acordes no reconocidos
+        const transposed = transChord(tok, shift, flat);
+        const key = canonicalChordKey(transposed);
+        if(!key) continue;
+        if(!seen.has(key)){ seen.add(key); order.push(key); }
+      }
+    }
+  }
+  return order;
+}
+
+// ---- resolución de diagrama: override de la canción > librería global ----
+function getChordDiagram(key, song){
+  const custom = song.custom_chord_diagrams && song.custom_chord_diagrams[key];
+  if(custom) return custom;
+  const lib = GLOBAL_CHORDS && GLOBAL_CHORDS[key];
+  if(lib && lib.length) return lib[0]; // primer voicing = default de la librería
+  return null;
+}
+
+// ---- SVG de un diagrama individual ----
+function chordDiagramSVG(voicing, label){
+  if(!voicing){
+    return `<div class="cd-missing" title="Sin diagrama para ${esc(label)}">${esc(label)}<br><span class="cd-missing-mark">?</span></div>`;
+  }
+  const {frets, baseFret=1, barres=[]} = voicing;
+  const ROWS=CD_ROWS, STRINGS=CD_STRINGS;
+  const W=76, H=92;
+  const padL=11, padR=7, padT=20, padB=8;
+  const gridW=W-padL-padR, gridH=H-padT-padB;
+  const stepX=gridW/(STRINGS-1), stepY=gridH/ROWS;
+
+  let s = `<svg class="cd-svg" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  s += `<text x="${W/2}" y="10" class="cd-label" text-anchor="middle">${esc(label)}</text>`;
+
+  if(baseFret<=1){
+    s += `<rect x="${padL}" y="${padT-2}" width="${gridW}" height="2.6" class="cd-nut"/>`;
+  } else {
+    s += `<text x="${padL-4}" y="${padT+stepY*0.75}" class="cd-fretnum" text-anchor="end">${baseFret}</text>`;
+  }
+
+  for(let f=0; f<=ROWS; f++){
+    const y=padT+f*stepY;
+    s += `<line x1="${padL}" y1="${y}" x2="${padL+gridW}" y2="${y}" class="cd-fretline"/>`;
+  }
+  for(let i=0;i<STRINGS;i++){
+    const x=padL+i*stepX;
+    s += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${padT+gridH}" class="cd-string"/>`;
+  }
+
+  // cejillas: valores de barres[] y frets[] son POSICIÓN RELATIVA dentro del
+  // diagrama (1 = primera fila mostrada), verificado contra el campo midi de chords-db
+  barres.forEach(row=>{
+    if(row<1||row>ROWS) return;
+    let first=-1,last=-1;
+    frets.forEach((fr,i)=>{ if(fr===row){ if(first===-1)first=i; last=i; } });
+    if(first===-1||first===last) return;
+    const y=padT+(row-0.5)*stepY;
+    s += `<line x1="${padL+first*stepX}" y1="${y}" x2="${padL+last*stepX}" y2="${y}" class="cd-barre"/>`;
+  });
+
+  frets.forEach((fr,i)=>{
+    const x=padL+i*stepX;
+    if(fr===-1){
+      s += `<text x="${x}" y="${padT-6}" class="cd-mute" text-anchor="middle">×</text>`;
+    } else if(fr===0){
+      s += `<circle cx="${x}" cy="${padT-6}" r="2.6" class="cd-open"/>`;
+    } else if(fr>=1 && fr<=ROWS){
+      const y=padT+(fr-0.5)*stepY;
+      s += `<circle cx="${x}" cy="${y}" r="3.6" class="cd-dot"/>`;
+    }
+  });
+
+  s += `</svg>`;
+  return s;
+}
+
+// ---- footer estático de la vista de canción ----
+function chordFooterHTML(song, shift, flat){
+  if(!GLOBAL_CHORDS) return ""; // aún no cargó la librería; se re-renderiza cuando resuelva
+  const keys = extractSongChordKeys(song, shift, flat);
+  if(!keys.length) return "";
+  const cells = keys.map(k=>{
+    const voicing = getChordDiagram(k, song);
+    return `<div class="cd-cell">${chordDiagramSVG(voicing, k)}</div>`;
+  }).join("");
+  return `<div class="sv-chords"><div class="ex-head">Acordes usados</div><div class="cd-strip">${cells}</div></div>`;
+}
+
+// =================================================================
+//  EDITOR DE DIAGRAMAS DE ACORDES (dentro del editor de canciones)
+// =================================================================
+
+// Lee los acordes DIRECTO del DOM (fuente de verdad mientras se edita,
+// igual criterio que usa validateChords()). Sin transponer: en el editor
+// siempre se trabaja con el acorde tal cual está escrito en la canción.
+function extractDraftChordKeys(){
+  const seen=new Set(), order=[];
+  document.querySelectorAll(".ci").forEach(inp=>{
+    (inp.value||"").split(/\s+/).forEach(tok=>{
+      if(!tok) return;
+      if(chordTokenStatus(tok)!=="ok") return;
+      const key=canonicalChordKey(tok);
+      if(!key) return;
+      if(!seen.has(key)){ seen.add(key); order.push(key); }
+    });
+  });
+  return order;
+}
+
+function refreshChordChips(){
+  const wrap=document.getElementById("edChordChips");
+  if(!wrap) return;
+
+  if(!GLOBAL_CHORDS){
+    wrap.innerHTML=`<div class="hint" style="margin:0">Cargando librería de acordes…</div>`;
+    loadGlobalChords().then(refreshChordChips);
+    return;
+  }
+
+  const keys=extractDraftChordKeys();
+  if(!keys.length){
+    wrap.innerHTML=`<div class="hint" style="margin:0">Escribe acordes en las estrofas para poder editar sus diagramas.</div>`;
+    return;
+  }
+
+  const overrides=STATE.editDraft.custom_chord_diagrams||{};
+  wrap.innerHTML=keys.map(k=>{
+    const custom=overrides[k];
+    const voicing=custom || (GLOBAL_CHORDS[k] && GLOBAL_CHORDS[k][0]) || null;
+    const thumb=chordDiagramSVG(voicing, k);
+    const title=custom?"Diagrama personalizado — click para editar":(voicing?"Diagrama de la librería — click para editar":"Sin diagrama — click para dibujar");
+    return `<button type="button" class="cd-chip${custom?" cd-chip-custom":""}" data-editchord="${esc(k)}" title="${title}">${thumb}</button>`;
+  }).join("");
+
+  wrap.querySelectorAll("[data-editchord]").forEach(b=>b.onclick=()=>openChordEditor(b.dataset.editchord));
+}
+
+function openChordEditor(key){
+  const d=STATE.editDraft;
+  const overrideRaw=(d.custom_chord_diagrams||{})[key];
+  const libVoicings=(GLOBAL_CHORDS && GLOBAL_CHORDS[key]) || [];
+
+  let initial, mode, libIndex=0;
+  if(overrideRaw){
+    initial={ frets:[...overrideRaw.frets], baseFret:overrideRaw.baseFret||1, barres:[...(overrideRaw.barres||[])] };
+    mode="manual";
+    const match=libVoicings.findIndex(v=>JSON.stringify(v.frets)===JSON.stringify(overrideRaw.frets) && (v.baseFret||1)===(overrideRaw.baseFret||1));
+    if(match>=0){ mode="library"; libIndex=match; }
+  } else if(libVoicings.length){
+    initial={ frets:[...libVoicings[0].frets], baseFret:libVoicings[0].baseFret||1, barres:[...(libVoicings[0].barres||[])] };
+    mode="library";
+  } else {
+    initial={ frets:[-1,-1,-1,-1,-1,-1], baseFret:1, barres:[] };
+    mode="manual";
+  }
+
+  STATE.chordEditor={ key, ...initial, libVoicings, libIndex, mode };
+  renderChordEditorModal();
+}
+
+function renderChordEditorModal(){
+  const ce=STATE.chordEditor;
+  const hasLib=ce.libVoicings.length>0;
+  const preview=chordDiagramSVG({frets:ce.frets, baseFret:ce.baseFret, barres:ce.barres}, ce.key);
+
+  const html=`<div class="modal-head"><h3>Acorde: ${esc(ce.key)}</h3>${closeBtn()}</div>
+  <div class="modal-body">
+    <div class="cd-editor-preview">${preview}</div>
+
+    <div class="cd-editor-tabs">
+      <button type="button" class="cd-tab${ce.mode==="library"?" on":""}" id="cdTabLib" ${hasLib?"":"disabled"}>Elegir de la librería${hasLib?` (${ce.libVoicings.length})`:""}</button>
+      <button type="button" class="cd-tab${ce.mode==="manual"?" on":""}" id="cdTabManual">Dibujar a mano</button>
+    </div>
+
+    ${ce.mode==="library" ? `
+      <div class="cd-lib-nav">
+        <button type="button" class="btn sm" id="cdLibPrev" ${ce.libIndex<=0?"disabled":""}>‹ Anterior</button>
+        <span class="hint" style="margin:0">Voicing ${ce.libIndex+1} de ${ce.libVoicings.length}</span>
+        <button type="button" class="btn sm" id="cdLibNext" ${ce.libIndex>=ce.libVoicings.length-1?"disabled":""}>Siguiente ›</button>
+      </div>
+    ` : `
+      <div class="cd-manual-editor" id="cdManualEditor"></div>
+      <div class="cd-basefret-row">
+        <span class="hint" style="margin:0">Traste base</span>
+        <button type="button" class="btn sm" id="cdBaseDown" ${ce.baseFret<=1?"disabled":""}>−</button>
+        <span class="cd-basefret-val">${ce.baseFret}</span>
+        <button type="button" class="btn sm" id="cdBaseUp">+</button>
+      </div>
+      <div class="hint" style="margin-top:10px">Click en <b>×</b>/<b>○</b> para silenciar o dejar al aire una cuerda. Click en la grilla para marcar el traste. Click en el número de traste (izquierda) para agregar cejilla en esa fila.</div>
+    `}
+
+    <div style="display:flex;gap:8px;margin-top:20px">
+      <button type="button" class="btn" id="cdRestore" style="flex:1;justify-content:center">Restaurar por defecto</button>
+      <button type="button" class="btn primary" id="cdSave" style="flex:1;justify-content:center">Guardar</button>
+    </div>
+  </div>`;
+
+  openModal(html);
+  attachChordEditorEvents();
+  if(ce.mode==="manual") renderManualFretboard();
+}
+
+function attachChordEditorEvents(){
+  const ce=STATE.chordEditor;
+
+  const tabLib=document.getElementById("cdTabLib");
+  const tabManual=document.getElementById("cdTabManual");
+  if(tabLib) tabLib.onclick=()=>{
+    if(!ce.libVoicings.length) return;
+    ce.mode="library";
+    applyLibVoicing();
+  };
+  if(tabManual) tabManual.onclick=()=>{ ce.mode="manual"; renderChordEditorModal(); };
+
+  const prev=document.getElementById("cdLibPrev");
+  const next=document.getElementById("cdLibNext");
+  if(prev) prev.onclick=()=>{ if(ce.libIndex>0){ ce.libIndex--; applyLibVoicing(); } };
+  if(next) next.onclick=()=>{ if(ce.libIndex<ce.libVoicings.length-1){ ce.libIndex++; applyLibVoicing(); } };
+
+  const baseDown=document.getElementById("cdBaseDown");
+  const baseUp=document.getElementById("cdBaseUp");
+  if(baseDown) baseDown.onclick=()=>{ if(ce.baseFret>1){ ce.baseFret--; renderChordEditorModal(); } };
+  if(baseUp) baseUp.onclick=()=>{ ce.baseFret++; renderChordEditorModal(); };
+
+  document.getElementById("cdRestore").onclick=()=>{
+    if(STATE.editDraft.custom_chord_diagrams) delete STATE.editDraft.custom_chord_diagrams[ce.key];
+    closeModal(); STATE.chordEditor=null;
+    refreshChordChips();
+    toast("Diagrama restaurado a la librería");
+  };
+  document.getElementById("cdSave").onclick=()=>{
+    if(!STATE.editDraft.custom_chord_diagrams) STATE.editDraft.custom_chord_diagrams={};
+    STATE.editDraft.custom_chord_diagrams[ce.key]={ frets:[...ce.frets], baseFret:ce.baseFret, barres:[...ce.barres] };
+    closeModal(); STATE.chordEditor=null;
+    refreshChordChips();
+    toast("Diagrama guardado");
+  };
+}
+
+function applyLibVoicing(){
+  const ce=STATE.chordEditor;
+  const v=ce.libVoicings[ce.libIndex];
+  ce.frets=[...v.frets]; ce.baseFret=v.baseFret||1; ce.barres=[...(v.barres||[])];
+  renderChordEditorModal();
+}
+
+function renderManualFretboard(){
+  const host=document.getElementById("cdManualEditor");
+  if(!host) return;
+  const ce=STATE.chordEditor;
+  const ROWS=CD_ROWS, STRINGS=CD_STRINGS;
+  const W=220, H=196;
+  const padL=28, padR=14, padT=50, padB=10;
+  const gridW=W-padL-padR, gridH=H-padT-padB;
+  const stepX=gridW/(STRINGS-1), stepY=gridH/ROWS;
+
+  let s=`<svg class="cd-editor-svg" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+
+  s+=`<rect x="${padL}" y="${padT-2}" width="${gridW}" height="3" class="cd-nut"/>`;
+
+  for(let f=0; f<=ROWS; f++){
+    const y=padT+f*stepY;
+    s+=`<line x1="${padL}" y1="${y}" x2="${padL+gridW}" y2="${y}" class="cd-fretline"/>`;
+  }
+  for(let i=0;i<STRINGS;i++){
+    const x=padL+i*stepX;
+    s+=`<line x1="${x}" y1="${padT}" x2="${x}" y2="${padT+gridH}" class="cd-string"/>`;
+  }
+
+  for(let row=1; row<=ROWS; row++){
+    const y=padT+(row-0.5)*stepY;
+    const isBarre=ce.barres.includes(row);
+    s+=`<text x="${padL-10}" y="${y+3}" text-anchor="end" class="cd-editor-fretnum">${ce.baseFret+row-1}</text>`;
+    s+=`<rect x="1" y="${y-6}" width="15" height="12" rx="3" class="cd-barre-btn${isBarre?" on":""}" data-barrerow="${row}"></rect>`;
+  }
+
+  ce.barres.forEach(row=>{
+    let first=-1,last=-1;
+    ce.frets.forEach((fr,i)=>{ if(fr===row){ if(first===-1)first=i; last=i; } });
+    if(first===-1||first===last) return;
+    const y=padT+(row-0.5)*stepY;
+    s+=`<line x1="${padL+first*stepX}" y1="${y}" x2="${padL+last*stepX}" y2="${y}" class="cd-barre"/>`;
+  });
+
+  ce.frets.forEach((fr,i)=>{
+    const x=padL+i*stepX;
+    s+=`<text x="${x}" y="${padT-32}" text-anchor="middle" class="cd-mute-btn${fr===-1?" on":""}" data-stringtoggle="${i}" data-tostate="-1">×</text>`;
+    s+=`<circle cx="${x}" cy="${padT-16}" r="5.5" class="cd-open-btn${fr===0?" on":""}" data-stringtoggle="${i}" data-tostate="0"></circle>`;
+
+    if(fr>=1 && fr<=ROWS){
+      const y=padT+(fr-0.5)*stepY;
+      s+=`<circle cx="${x}" cy="${y}" r="7.5" class="cd-dot"/>`;
+    }
+    for(let row=1; row<=ROWS; row++){
+      const y=padT+(row-0.5)*stepY;
+      s+=`<rect x="${x-stepX/2}" y="${y-stepY/2}" width="${stepX}" height="${stepY}" class="cd-cell-hit" data-stringfret="${i}" data-row="${row}"></rect>`;
+    }
+  });
+
+  s+=`</svg>`;
+  host.innerHTML=s;
+
+  host.querySelectorAll("[data-stringtoggle]").forEach(el=>el.onclick=()=>{
+    const i=+el.dataset.stringtoggle, target=+el.dataset.tostate;
+    ce.frets[i]=target;
+    renderManualFretboard();
+    updateChordEditorPreview();
+  });
+  host.querySelectorAll("[data-stringfret]").forEach(el=>el.onclick=()=>{
+    const i=+el.dataset.stringfret, row=+el.dataset.row;
+    ce.frets[i]=(ce.frets[i]===row) ? -1 : row;
+    renderManualFretboard();
+    updateChordEditorPreview();
+  });
+  host.querySelectorAll("[data-barrerow]").forEach(el=>el.onclick=()=>{
+    const row=+el.dataset.barrerow;
+    const idx=ce.barres.indexOf(row);
+    if(idx>=0) ce.barres.splice(idx,1); else ce.barres.push(row);
+    renderManualFretboard();
+    updateChordEditorPreview();
+  });
+}
+
+function updateChordEditorPreview(){
+  const ce=STATE.chordEditor;
+  const host=document.querySelector(".cd-editor-preview");
+  if(host) host.innerHTML=chordDiagramSVG({frets:ce.frets, baseFret:ce.baseFret, barres:ce.barres}, ce.key);
+}
+
+// =================================================================
 //  BÚSQUEDA
 // =================================================================
 function norm(s){return (s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")}
@@ -341,6 +1164,7 @@ let STATE = {
   activeList:null,
   editing:false,
   editDraft:null,
+  chordEditor:null,       // modal de edición de UN diagrama de acorde (efímero)
   editTarget:"song",      // song | staged | new | pending
   editStagedIdx:null,
   editPendingId:null,     // uuid del pending_edit que se está aprobando
@@ -580,6 +1404,9 @@ function openSong(id){
   if(bar)bar.classList.remove("show");
   trackVisit(id);
   render();
+  loadGlobalChords().then(()=>{
+    if(STATE.view==="song" && STATE.songId===id) render();
+  });
   if(isLoggedIn() && !isAdmin()){
     Promise.all([loadPendingEdits(), loadPendingImports()]).then(()=>{
       if(STATE.view==="song" && STATE.songId===id) render();
@@ -694,6 +1521,8 @@ function renderSong(){
     html+=`</div>`;
   }
   html+=`</div>`;
+
+  if(PREFS.showChords) html += chordFooterHTML(s, shift, flat);
 
   // ----- ENLACES (múltiples) -----
   const songLinks = LINKS[id]||[];
@@ -1119,7 +1948,8 @@ function startEdit(id){
   STATE.editDraft={
     title:s.title, categorias:catsOf(s), liturgica:(s.liturgica===undefined?null:s.liturgica),
     coleccion:collOf(s), credits:s.credits||"", capo:+(s.capo||0),
-    sections: JSON.parse(JSON.stringify(s.sections||[]))
+    sections: JSON.parse(JSON.stringify(s.sections||[])),
+    custom_chord_diagrams: s.custom_chord_diagrams ? JSON.parse(JSON.stringify(s.custom_chord_diagrams)) : {}
   };
   STATE.view="song";
   window.scrollTo(0,0);
@@ -1132,7 +1962,8 @@ function startEditStaged(idx){
   STATE.editDraft={
     title:s.title||"", categorias:catsOf(s), liturgica:(s.liturgica===undefined?null:s.liturgica),
     coleccion:s.coleccion||"general", credits:s.credits||"", capo:+(s.capo||0),
-    sections: JSON.parse(JSON.stringify(s.sections||[[{lyric:"",chords:""}]]))
+    sections: JSON.parse(JSON.stringify(s.sections||[[{lyric:"",chords:""}]])),
+    custom_chord_diagrams: s.custom_chord_diagrams ? JSON.parse(JSON.stringify(s.custom_chord_diagrams)) : {}
   };
   window.scrollTo(0,0);
   render();
@@ -1141,7 +1972,7 @@ function startEditStaged(idx){
 function startAddManual(){
   STATE.editing=true; STATE.editTarget="new"; STATE.view="song"; STATE.songId=null;
   STATE.editDraft={ title:"", categorias:[], liturgica:null, coleccion:"general", credits:"", capo:0,
-    sections:[[{lyric:"",chords:""}]] };
+    sections:[[{lyric:"",chords:""}]], custom_chord_diagrams:{} };
   window.scrollTo(0,0);
   render();
 }
@@ -1156,7 +1987,8 @@ function startAddVersion(baseId){
     coleccion:collOf(base), credits:base.credits||"", capo:+(base.capo||0),
     sections: JSON.parse(JSON.stringify(base.sections||[[{lyric:"",chords:""}]])),
     versionLabel:"Versión "+(siblings+2),
-    _versionParent: baseId, _versionParentTitle: base.title
+    _versionParent: baseId, _versionParentTitle: base.title,
+    custom_chord_diagrams: base.custom_chord_diagrams ? JSON.parse(JSON.stringify(base.custom_chord_diagrams)) : {}
   };
   window.scrollTo(0,0);
   render();
@@ -1233,6 +2065,13 @@ function renderEditor(){
 
   html+=`</div>
     <button class="btn" id="addSection" style="width:100%;justify-content:center;margin:4px 0 20px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg> Agregar estrofa</button>
+`;
+
+  html+=`<div style="display:flex;align-items:center;justify-content:space-between;margin:18px 0 10px">
+      <label style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)">Diagramas de acordes</label>
+      <span class="hint" style="margin:0">Se detectan solos. Click en uno para elegir otro voicing o dibujarlo a mano.</span>
+    </div>
+    <div class="cd-chip-wrap" id="edChordChips"><div class="hint" style="margin:0">Cargando librería de acordes…</div></div>
 `;
 
   if(tgt==="song" && isAdmin()){
@@ -1339,6 +2178,7 @@ function attachEditorEvents(id){
     if(d.liturgica===true||d.liturgica===false) songObj.liturgica=d.liturgica;
     if(d.capo>0) songObj.capo=d.capo; else songObj.capo=0;
     if(d.credits&&d.credits.trim()) songObj.credits=d.credits.trim(); else songObj.credits=null;
+    songObj.custom_chord_diagrams = d.custom_chord_diagrams||{};
 
     if(tgt==="new"){
       const dup=findDuplicateCandidate(songObj.title, songObj.sections);
@@ -1442,8 +2282,9 @@ function attachEditorEvents(id){
       else w.style.display="none";
     }
   }
-  document.querySelectorAll(".ci").forEach(inp=>inp.addEventListener("input",validateChords));
+  document.querySelectorAll(".ci").forEach(inp=>inp.addEventListener("input",()=>{validateChords();refreshChordChips();}));
   validateChords();
+  refreshChordChips();
 
   document.querySelectorAll("[data-addline]").forEach(b=>b.onclick=()=>{readEditorIntoDraft();STATE.editDraft.sections[+b.dataset.addline].push({lyric:"",chords:""});render()});
   document.querySelectorAll("[data-linedel]").forEach(b=>b.onclick=()=>{readEditorIntoDraft();const[si,li]=b.dataset.linedel.split("-").map(Number);STATE.editDraft.sections[si].splice(li,1);if(STATE.editDraft.sections[si].length===0)STATE.editDraft.sections.splice(si,1);render()});
@@ -2005,6 +2846,7 @@ function buildPayloadSong(s){
   obj.capo=+s.capo>0?+s.capo:0;
   if(s.credits&&s.credits.trim())obj.credits=s.credits.trim();
   if(s.parent_song_id){ obj.parent_song_id=s.parent_song_id; obj.version_label=s.version_label||""; }
+  if(s.custom_chord_diagrams && Object.keys(s.custom_chord_diagrams).length) obj.custom_chord_diagrams=s.custom_chord_diagrams;
   return obj;
 }
 
@@ -2859,7 +3701,8 @@ function openPendingEditsPanel(){
       coleccion:pe.edit_data.coleccion||collOf(s),
       credits:pe.edit_data.credits||s.credits||"",
       capo:+(pe.edit_data.capo||0),
-      sections:JSON.parse(JSON.stringify(pe.edit_data.sections||s.sections||[[{lyric:"",chords:""}]]))
+      sections:JSON.parse(JSON.stringify(pe.edit_data.sections||s.sections||[[{lyric:"",chords:""}]])),
+      custom_chord_diagrams:JSON.parse(JSON.stringify(pe.edit_data.custom_chord_diagrams||s.custom_chord_diagrams||{}))
     };
     window.scrollTo(0,0);
     render();
