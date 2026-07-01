@@ -1,56 +1,46 @@
-/* ============ CONFIGURACIÓN DE DISEÑO Y TEMAS (SISTEMA DE DISEÑO) ============ */
+/* ============ CONFIGURACIÓN DE DISEÑO Y PALETA OFICIAL ============ */
 :root {
-  /* Paleta Oficial Optimizada - Modo Claro */
-  --bg: #FAF8F2;             /* Variación sutil de Crema de fondo */
-  --surface: #FFFFFF;        /* Superficie limpia */
-  --surface-2: #EAE4D4;      /* Tu color Crema de referencia como contenedor */
+  /* Paleta Oficial - Modo Claro */
+  --bg: #FAF8F2;             /* Variación premium del Crema de fondo */
+  --surface: #FFFFFF;        /* Superficies limpias */
+  --surface-2: #EAE4D4;      /* Tu color CREMA de referencia (100% fiel) */
   
-  --navy: #14143D;           /* Tu color Azul Marino de referencia */
-  --navy-light: #232354;
-  --red: #C8372B;            /* Tu color Rojo de referencia */
-  
-  --ink: #14143D;            /* Texto principal en Azul Marino para máxima consistencia */
-  --muted: #565675;          /* Azul grisáceo para textos secundarios */
+  --ink: #14143D;            /* Texto principal en AZUL MARINO oficial */
+  --muted: #565675;          /* Azul grisáceo para secundarios */
   --faint: #9292A6;          /* Detalles tenues */
   
   --line: #E2DBD0;           /* Líneas suaves basadas en el tono crema */
   --line-strong: #CDc5B5;
   
-  --indigo: #14143D;         /* Fondo Header (Azul Marino institucional) */
-  --indigo-ink: #FFFFFF;     /* Texto sobre fondo Marino */
+  --indigo: #14143D;         /* Fondo Header (AZUL MARINO oficial) */
+  --indigo-ink: #FFFFFF;     /* Texto sobre fondo marino */
   
   --gold: #A67C1E;
   --gold-bg: #F5EEDA;
   --star: #E0A600;
-  --danger: #C8372B;         /* Rojo institucional para estados críticos */
+  --danger: #C8372B;         /* ROJO oficial para estados críticos o alertas */
   
-  /* Elevación, Bordes y Animación */
-  --shadow-sm: 0 2px 8px rgba(20, 20, 61, 0.04);
-  --shadow-md: 0 8px 24px -4px rgba(20, 20, 61, 0.08), 0 2px 6px -1px rgba(20, 20, 61, 0.04);
-  --shadow-lg: 0 16px 40px -10px rgba(20, 20, 61, 0.12);
-  
-  --radius: 16px;
+  --shadow: 0 4px 12px rgba(20, 20, 61, 0.05), 0 1px 3px rgba(20, 20, 61, 0.03);
+  --radius: 14px; 
   --radius-sm: 10px;
-  --radius-lg: 24px;
   --lyric-size: 18px;
   
-  /* Curvas de transición fluidas */
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --serif: Georgia, "Iowan Old Style", "Times New Roman", serif;
+  --mono: "SF Mono", ui-monospace, "Cascadia Mono", "Roboto Mono", Menlo, monospace;
+  
+  /* Animaciones fluidas */
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
   --transition: all 0.25s var(--ease);
-  --transition-fast: all 0.15s var(--ease);
-  
-  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, system-ui, sans-serif;
-  --serif: "Playfair Display", Georgia, "Iowan Old Style", "Times New Roman", serif;
-  --mono: "SF Mono", ui-monospace, "Cascadia Mono", Menlo, monospace;
 }
 
 html[data-theme="dark"] {
-  /* Paleta Oficial Optimizada - Modo Oscuro */
+  /* Paleta Oficial - Modo Oscuro */
   --bg: #0A0A18;             /* Fondo profundo marino */
-  --surface: #14143D;        /* Tu Azul Marino oficial como superficie base */
+  --surface: #14143D;        /* Tu AZUL MARINO oficial como superficie base */
   --surface-2: #1E1E4F;      /* Contenedor secundario */
   
-  --ink: #EAE4D4;            /* ¡Tu color Crema oficial se convierte en el texto legible! */
+  --ink: #EAE4D4;            /* Tu color CREMA pasa a ser el texto legible */
   --muted: #A5A5C5;
   --faint: #676790;
   
@@ -63,15 +53,14 @@ html[data-theme="dark"] {
   --gold: #E5B23A;
   --gold-bg: #2B2514;
   --star: #F3C446;
-  --danger: #E84A3F;
-  --shadow-md: 0 12px 32px -6px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 20px 48px -8px rgba(0, 0, 0, 0.6);
+  --danger: #E84A3F;         /* Rojo brillante en modo oscuro */
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 /* ============ RESETS Y ERGONOMÍA GLOBAL ============ */
 * {
   box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent; /* Elimina flash azul feo en móviles */
+  -webkit-tap-highlight-color: transparent;
 }
 
 html, body {
@@ -86,85 +75,47 @@ body {
   color: var(--ink);
   font-family: var(--sans);
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   line-height: 1.5;
-  overflow-x: hidden;
-  overscroll-behavior-y: none;
 }
 
-button {
-  font-family: inherit;
-  cursor: pointer;
-  color: inherit;
-  border: none;
-  background: transparent;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: var(--transition-fast);
-}
-
-button:active {
-  transform: scale(0.96); /* Efecto elástico de presión física */
-}
-
-input, select, textarea {
-  font-family: inherit;
-  color: inherit;
-  transition: var(--transition-fast);
-}
-
-input:focus, select:focus, textarea:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(20, 20, 61, 0.15);
-}
-
-::selection {
-  background: var(--surface-2);
-  color: var(--navy);
-}
-
-/* Custom Scrollbar Premium */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: var(--line-strong);
-  border-radius: 999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--faint);
+  border-radius: 10px;
 }
 
-/* ============ ESTRUCTURA Y NAVEGACIÓN PRINCIPAL ============ */
+/* ============ ESTRUCTURA PRINCIPAL DE TU HTML ============ */
 .app {
   display: flex;
   flex-direction: column;
   min-height: 100%;
 }
 
+/* Header pegajoso con desenfoque moderno (Glassmorphism) */
 header.top {
   position: sticky;
   top: 0;
   z-index: 40;
-  background: rgba(20, 20, 61, 0.92); /* Azul marino institucional con transparencia */
-  backdrop-filter: blur(16px) -webkit-backdrop-filter: blur(16px);
+  background: rgba(20, 20, 61, 0.92); /* Azul Marino con opacidad */
+  backdrop-filter: blur(12px) -webkit-backdrop-filter: blur(12px);
   color: var(--indigo-ink);
-  padding: env(safe-area-inset-top) 0 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow);
 }
 
 .top-inner {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 14px 20px;
-  max-width: 1100px;
+  padding: 12px 16px;
+  max-width: 800px;
   margin: 0 auto;
   width: 100%;
 }
@@ -172,189 +123,127 @@ header.top {
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  cursor: pointer;
   user-select: none;
 }
-
-.brand .mark {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
-  transition: transform 0.4s var(--ease);
-}
-.brand:hover .mark {
-  transform: rotate(6deg) scale(1.05);
-}
-
 .brand h1 {
-  font-family: var(--serif);
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   margin: 0;
-  letter-spacing: -0.2px;
-  white-space: nowrap;
+  letter-spacing: -0.3px;
+}
+.brand-logo {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
 }
 
-.brand small {
-  display: block;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--surface-2); /* Crema de acento */
-  opacity: 0.85;
-  margin-top: 1px;
-}
-
-/* Caja de Búsqueda Moderna */
+/* Caja de búsqueda fluida */
 .search-wrap {
   flex: 1;
   position: relative;
-  min-width: 180px;
 }
-
 .search-wrap input {
   width: 100%;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: var(--radius-sm);
-  padding: 10px 16px 10px 40px;
-  font-size: 14.5px;
+  padding: 8px 12px 8px 34px;
+  font-size: 14px;
   background: rgba(255, 255, 255, 0.08);
   color: #FFFFFF;
-  outline: none;
+  transition: var(--transition);
 }
-
 .search-wrap input:focus {
+  outline: none;
   background: rgba(255, 255, 255, 0.15);
   border-color: var(--surface-2);
-  box-shadow: 0 0 0 4px rgba(234, 228, 212, 0.15);
 }
-
-.search-wrap input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
-}
-
 .search-wrap .ico {
   position: absolute;
-  left: 14px;
+  left: 10px;
   top: 50%;
   transform: translateY(-50%);
-  opacity: 0.6;
+  opacity: 0.5;
   color: #FFFFFF;
-  pointer-events: none;
 }
 
 .search-clear {
   position: absolute;
-  right: 10px;
+  right: 8px;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
   border-radius: 50%;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   display: none;
+  align-items: center;
+  justify-content: center;
   color: #FFFFFF;
+  cursor: pointer;
 }
-.search-clear:hover {
-  background: rgba(255, 255, 255, 0.25);
-}
-.search-clear.show {
-  display: flex;
-}
+.search-clear.show { display: flex; }
 
-/* Botones de acción del Header */
+/* Botones de acción superiores */
 .iconbtn {
-  background: rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
   border-radius: var(--radius-sm);
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: #FFFFFF;
-  opacity: 0.9;
+  cursor: pointer;
+  transition: var(--transition);
 }
 .iconbtn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  opacity: 1;
-  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.16);
 }
 
-/* Pestañas de Navegación */
-.tabs {
-  display: flex;
-  gap: 6px;
-  padding: 4px 20px 12px;
-  max-width: 1100px;
-  margin: 0 auto;
-  width: 100%;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.tabs::-webkit-scrollbar { display: none; }
-
-.tab {
-  color: rgba(255, 255, 255, 0.65);
-  font-size: 14px;
-  font-weight: 600;
-  padding: 8px 16px;
-  border-radius: 999px;
-  white-space: nowrap;
-}
-.tab:hover {
-  color: #FFFFFF;
-  background: rgba(255, 255, 255, 0.06);
-}
-.tab.active {
-  background: var(--surface-2); /* Crema destacado */
-  color: var(--navy);            /* Texto marino encima */
-  box-shadow: var(--shadow-sm);
-}
-
+/* Contenido Principal */
 main {
   flex: 1;
-  max-width: 1100px;
+  max-width: 800px;
   margin: 0 auto;
   width: 100%;
-  padding: 0 20px 100px;
+  padding: 16px;
 }
 
-/* ============ FILTROS Y CHIPS FLUIDOS ============ */
-.filters {
-  position: sticky;
-  top: 115px; /* Ajuste preciso bajo header */
-  z-index: 20;
-  background: linear-gradient(var(--bg) 65%, rgba(250, 248, 242, 0));
-  padding: 16px 0 12px;
-  margin: 0 -20px;
-  padding-left: 20px;
-  padding-right: 20px;
+/* ============ FILTROS Y CHIPS (ZONA DE SELECCIÓN) ============ */
+.chips-scroll {
+  overflow-x: auto;
+  margin: 0 -16px 12px;
+  padding: 4px 16px;
+  scrollbar-width: none;
 }
-html[data-theme="dark"] .filters {
-  background: linear-gradient(var(--bg) 65%, rgba(10, 10, 24, 0));
-}
+.chips-scroll::-webkit-scrollbar { display: none; }
 
 .chips {
   display: flex;
   gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
+  width: max-content;
 }
-.chips::-webkit-scrollbar { display: none; }
 
 .chip {
-  flex-shrink: 0;
   border: 1px solid var(--line-strong);
   background: var(--surface);
   color: var(--muted);
-  border-radius: var(--radius-sm);
-  padding: 7px 14px;
+  border-radius: 20px;
+  padding: 6px 14px;
   font-size: 13px;
   font-weight: 600;
-  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
 }
 .chip:hover {
-  border-color: var(--navy);
+  border-color: var(--ink);
   color: var(--ink);
   transform: translateY(-1px);
 }
@@ -363,32 +252,19 @@ html[data-theme="dark"] .filters {
   color: var(--surface);
   border-color: var(--navy);
 }
-
 .chip .dot {
   display: inline-block;
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  margin-right: 8px;
-  background-color: var(--line-strong);
+  margin-right: 6px;
+  background: var(--faint);
 }
 .chip.active .dot {
-  background-color: var(--surface-2) !important; /* El punto brilla en crema */
+  background: var(--surface-2) !important; /* El punto brilla en crema en el activo */
 }
 
-.meta-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 14px;
-  flex-wrap: wrap;
-}
-.count {
-  font-size: 13px;
-  color: var(--muted);
-  font-weight: 600;
-}
+/* Selector de colecciones */
 .coll-select {
   font-size: 13px;
   font-weight: 600;
@@ -396,286 +272,189 @@ html[data-theme="dark"] .filters {
   background: var(--surface);
   border: 1px solid var(--line-strong);
   border-radius: 8px;
-  padding: 6px 12px;
+  padding: 4px 8px;
   cursor: pointer;
 }
-.coll-select:hover {
-  border-color: var(--navy);
-}
 
-/* ============ LISTADO DE CANCIONES (PRODUCCIÓN PREMIUM) ============ */
-.list {
-  margin-top: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.song-row {
+/* ============ LISTADO DINÁMICO DE CANCIONES ============ */
+/* Mantiene las clases exactas generadas por tu JavaScript */
+.song-item {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 12px 16px;
-  border-radius: var(--radius);
+  gap: 12px;
+  padding: 12px 14px;
   background: var(--surface);
   border: 1px solid var(--line);
+  border-radius: var(--radius);
+  margin-bottom: 6px;
   cursor: pointer;
   transition: var(--transition);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 6px rgba(20, 20, 61, 0.02);
 }
-
-.song-row:hover {
+.song-item:hover {
   transform: translateY(-2px);
   border-color: var(--line-strong);
-  box-shadow: var(--shadow-md);
-  background: var(--surface);
+  box-shadow: 0 6px 16px rgba(20, 20, 61, 0.06);
 }
 
-html[data-theme="dark"] .song-row:hover {
-  background: var(--surface-2); /* Ligero realce crema-oscuro */
-}
-
-.song-num {
+.song-idx {
   font-family: var(--mono);
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 12px;
   color: var(--faint);
-  width: 36px;
+  width: 24px;
   text-align: right;
-  flex-shrink: 0;
 }
-
-.song-main {
+.song-mid {
   flex: 1;
   min-width: 0;
 }
-
 .song-title {
   font-family: var(--serif);
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
-  line-height: 1.3;
   color: var(--ink);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  margin: 0 0 2px 0;
 }
-
-.song-sub {
+.song-meta {
   font-size: 12px;
   color: var(--muted);
-  margin-top: 4px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
-
-/* Tags de Categoría Elegantes */
-.cat-tag {
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  font-size: 9.5px;
-  padding: 2px 8px;
-  border-radius: 6px;
-  background: var(--bg);
-  border: 1px solid var(--line);
-}
-
-/* Colores específicos para liturgia Misión País */
-[data-cat="entrada"] { color: var(--navy); border-color: rgba(20,20,61,0.2); }
-[data-cat="perdon"] { color: #6E6E82; }
-[data-cat="gloria"] { color: var(--gold); }
-[data-cat="ofertorio"] { color: #8C52FF; }
-[data-cat="comunion"] { color: var(--red); border-color: rgba(200,55,43,0.2); }
-
-.song-row .row-actions {
+.song-right {
   display: flex;
   gap: 4px;
-  flex-shrink: 0;
-  opacity: 0.4;
-  transition: var(--transition-fast);
-}
-.song-row:hover .row-actions {
-  opacity: 1;
 }
 
-.mini {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  color: var(--muted);
-}
-.mini:hover {
-  background: var(--bg);
-  color: var(--ink);
-}
-.mini.faved {
-  color: var(--star);
-  opacity: 1 !important;
-}
-
-.divider {
-  height: 1px;
-  background: var(--line);
-  margin: 24px 0;
-}
-
-/* ============ VISTA DE CANCIÓN COMPLETA (LETRAS Y ACORDES) ============ */
-.song-view {
-  animation: fadeIn 0.3s var(--ease);
-}
-
-.song-header {
-  margin-bottom: 28px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--line);
-}
-.song-header h2 {
-  font-family: var(--serif);
-  font-size: 28px;
+/* Tags de Categorías Litúrgicas */
+.cat-badge {
+  font-size: 10px;
   font-weight: 700;
-  margin: 0 0 6px 0;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--surface-2);
   color: var(--ink);
-  letter-spacing: -0.4px;
+  border: 1px solid var(--line);
 }
+/* Colores de categorías usando tu Rojo y Azul Marino institucional */
+[data-cat="entrada"] { background: rgba(20,20,61,0.08); color: var(--navy); }
+[data-cat="comunion"] { background: rgba(200,55,43,0.08); color: var(--red); }
+[data-cat="gloria"] { background: var(--gold-bg); color: var(--gold); }
 
-.song-body {
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
+/* Botones pequeños de acción */
+.mini-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.mini-btn:hover { background: var(--bg); color: var(--ink); }
+.mini-btn.active { color: var(--star); }
+
+/* ============ VISTA DE LETRAS Y ACORDES (EL CANCIONERO) ============ */
+.lyrics-view {
+  animation: fadeIn 0.25s var(--ease);
+}
+.lyrics-head {
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 12px;
+}
+.lyrics-head h2 {
+  font-family: var(--serif);
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
 }
 
 /* Bloques de estrofas */
-.verse {
+.ly-block {
   background: var(--surface);
-  padding: 18px 22px;
+  padding: 16px 20px;
   border-radius: var(--radius);
-  border-left: 4px solid var(--surface-2); /* Borde decorativo crema */
-  box-shadow: var(--shadow-sm);
+  margin-bottom: 16px;
+  border-left: 4px solid var(--surface-2); /* Acento Crema */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.01);
 }
-.verse.coro {
-  border-left-color: var(--red); /* El coro destaca con tu rojo */
+.ly-block.coro {
+  border-left-color: var(--red);          /* El Coro resalta en tu Rojo oficial */
   background: var(--gold-bg);
 }
-html[data-theme="dark"] .verse.coro {
+html[data-theme="dark"] .ly-block.coro {
   background: rgba(200, 55, 43, 0.08);
-  border-left-color: var(--red);
 }
 
-/* Líneas de música fluidas */
-.line-pair {
-  margin-bottom: 14px;
+/* Líneas pareadas (Acorde arriba, texto abajo) */
+.ly-line {
+  margin-bottom: 12px;
 }
-.line-pair:last-child {
-  margin-bottom: 0;
-}
+.ly-line:last-child { margin-bottom: 0; }
 
-.chords {
+.c-row {
   font-family: var(--mono);
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 700;
-  color: var(--red); /* Acordes limpios en tu rojo de referencia */
-  letter-spacing: 0.5px;
-  margin-bottom: 2px;
-  height: 18px; /* Previene saltos si falta acorde */
+  color: var(--red); /* Tus acordes limpios en ROJO institucional */
+  height: 16px;
+  white-space: pre;
 }
-
-.lyric {
+.t-row {
   font-size: var(--lyric-size);
   color: var(--ink);
-  line-height: 1.4;
 }
 
-/* ============ INTERFAZ FLOTANTE Y COMPONENTES MODERNOS ============ */
-/* Botones de acción flotantes (FAB) */
-.back-to-top, .scroll-fab {
+/* ============ COMPONENTES FLOTANTES Y MODALES ============ */
+.fab {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
-  width: 48px;
-  height: 48px;
+  bottom: 20px;
+  right: 20px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   background: var(--navy);
   color: #FFFFFF;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 4px 16px rgba(20,20,61,0.3);
   z-index: 30;
 }
-.back-to-top:hover, .scroll-fab:hover {
-  transform: translateY(-4px);
-  background: var(--navy-light);
-}
+.fab:hover { transform: translateY(-2px); }
 
-.toast {
-  position: fixed;
-  bottom: 32px;
-  left: 50%;
-  transform: translate;
-  transform: translateX(-50%) translateY(100px);
-  background: var(--navy);
-  color: var(--surface-2);
-  padding: 12px 24px;
-  border-radius: 999px;
-  font-weight: 600;
-  font-size: 14px;
-  box-shadow: var(--shadow-lg);
-  z-index: 100;
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-.toast.show {
-  transform: translateX(-50%) translateY(0);
-}
-
-/* Modales Modernos tipo Bottom Sheet en Móviles */
+/* Modales y Hojas Inferiores (Bottom Sheets) */
 .scrim {
   position: fixed;
   inset: 0;
-  background: rgba(10, 10, 24, 0.5);
-  backdrop-filter: blur(8px);
+  background: rgba(10,10,24,0.4);
+  backdrop-filter: blur(6px);
   z-index: 50;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.25s var(--ease);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
 }
-.scrim.show {
-  opacity: 1;
-  pointer-events: auto;
-}
-
 .modal {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -45%) scale(0.96);
   background: var(--surface);
   border-radius: var(--radius);
-  padding: 24px;
-  max-width: 500px;
-  width: 90%;
-  box-shadow: var(--shadow-lg);
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.scrim.show .modal {
-  transform: translate(-50%, -50%) scale(1);
+  padding: 20px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: var(--shadow);
+  animation: modalIn 0.3s var(--ease);
 }
 
-@media (max-width: 600px) {
-  .modal {
-    top: auto;
-    bottom: 0;
-    left: 0;
-    transform: translateY(100%);
-    width: 100%;
-    max-width: 100%;
-    border-radius: var(--radius) var(--radius) 0 0;
-  }
-  .scrim.show .modal {
-    transform: translateY(0);
+/* Ajuste móvil para comportamiento tipo App Nativa */
+@media (max-width: 480px) {
+  .scrim { align-items: flex-end; padding: 0; }
+  .modal { 
+    border-radius: var(--radius) var(--radius) 0 0; 
+    animation: sheetIn 0.3s var(--ease);
   }
 }
 
-/* Animaciones */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+/* Animaciones de Entrada */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes modalIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+@keyframes sheetIn { from { transform: translateY(100%); } to { transform: translateY(0); } }
